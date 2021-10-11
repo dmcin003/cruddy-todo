@@ -8,9 +8,26 @@ var items = {};
 // Public API - Fix these CRUD functions ///////////////////////////////////////
 
 exports.create = (text, callback) => {
-  var id = counter.getNextUniqueId();
-  items[id] = text;
-  callback(null, { id, text });
+  //create a file using fs module
+  counter.getNextUniqueId((err, id) =>{
+    // handle error,
+    if (err) {
+      throw ('error writing todo');
+    } else {
+    // otherwise
+    // fs.writefile
+      fs.writeFile(path.join(exports.dataDir, `${id}.txt`), text, (err) => { // -----> data/0001.txt
+        if (err) {
+          throw ('error writing todo file');
+        } else {
+          callback(null, { id, text });
+        }
+      });
+    }
+  });
+  // 'data/12' // 'data/:id'
+  // items[id] = text;
+  // callback(null, { id, text });
 };
 
 exports.readAll = (callback) => {
