@@ -50,14 +50,16 @@ exports.readAll = (callback) => {
 };
 // result is gonna look like this ----> [{ id: '00001', text: '00001' }, { id: '00002', text: '00002' }];
 
-
 exports.readOne = (id, callback) => {
-  var text = items[id];
-  if (!text) {
-    callback(new Error(`No item with id: ${id}`));
-  } else {
-    callback(null, { id, text });
-  }
+  fs.readFile(path.join(exports.dataDir, `${id}.txt`), (err, fileData) => { // <--- directory, using the right id
+    if (err) {
+      callback(new Error(`No item with id: ${id}`));
+    } else {
+      // console.log('file data inside  ', fileData.toString());
+      callback(null, { id, text: fileData.toString() });
+    }
+  });
+
 };
 
 exports.update = (id, text, callback) => {
