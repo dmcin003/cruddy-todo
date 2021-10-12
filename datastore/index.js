@@ -2,6 +2,8 @@ const fs = require('fs');
 const path = require('path');
 const _ = require('underscore');
 const counter = require('./counter');
+const Promise = require('bluebird');
+var readFile = Promise.promisify(fs.readFile);
 
 var items = {};
 
@@ -28,6 +30,54 @@ exports.create = (text, callback) => {
 };
 
 exports.readAll = (callback) => {
+  var result = [];
+  var promises = [];
+
+  fs.readdir(exports.dataDir, (err, fileData) => {
+    // console.log('this is the file data ', fileData);
+    if (err) {
+      throw ('error reading directory');
+    } else {
+      fileData.forEach((file)=>{
+        promises.push(readFile(path.join(exports.dataDir, file))
+          .then(function(contents) {
+            console.log('i got from the chef ', contents.toString());
+            var id = file.replace('.txt', '');
+            var happyMeal = {
+              'id': id,
+              'text': contents.toString()
+            };
+            return happyMeal;
+          })
+          .catch(function(e) {
+            console.log('Error reading file', e);
+          }));
+      });
+    }
+    //console.log('Promises Array>>>>>:', promises);
+    Promise.all(promises)
+      .then((values) => {
+        console.log('values after promise all ', values);
+        callback(null, values);
+      });
+  });
+};
+
+
+/*
+  .then((profile) => {
+    fs.writeFile(writeFilePath, JSON.stringify(profile), (err) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(JSON.stringify(profile));
+      }
+    });
+  })
+*/
+
+/* ORIGINAL READ ALL FUNCTION
+exports.readAll = (callback) => {
 
   fs.readdir(exports.dataDir, (err, fileData) => {
     // console.log('this is the file data ', fileData);
@@ -48,6 +98,9 @@ exports.readAll = (callback) => {
     }
   });
 };
+
+*/
+
 // result is gonna look like this ----> [{ id: '00001', text: '00001' }, { id: '00002', text: '00002' }];
 
 exports.readOne = (id, callback) => {
@@ -55,7 +108,7 @@ exports.readOne = (id, callback) => {
     if (err) {
       callback(new Error(`No item with id: ${id}`));
     } else {
-      // console.log('file data inside  ', fileData.toString());
+      //console.log('file data inside  ', fileData.toString());
       callback(null, { id, text: fileData.toString() });
     }
   });
