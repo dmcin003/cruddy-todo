@@ -20,6 +20,7 @@ const readCounter = (callback) => {
     if (err) {
       callback(null, 0);
     } else {
+      // console.log('file data inside readCounter ', fileData.toString());
       callback(null, Number(fileData));
     }
   });

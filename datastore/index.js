@@ -25,17 +25,31 @@ exports.create = (text, callback) => {
       });
     }
   });
-  // 'data/12' // 'data/:id'
-  // items[id] = text;
-  // callback(null, { id, text });
 };
 
 exports.readAll = (callback) => {
-  var data = _.map(items, (text, id) => {
-    return { id, text };
+
+  fs.readdir(exports.dataDir, (err, fileData) => {
+    // console.log('this is the file data ', fileData);
+    if (err) {
+      throw ('error reading directory');
+    } else {
+      var result = [];
+      fileData.forEach((file)=>{
+        var id = file.replace('.txt', '');
+        // create obj set properties and then push
+        result.push({
+          'id': id,
+          'text': id
+        });
+      });
+      // console.log('This is our id objects array >>>>>: ', result);
+      callback(null, result);
+    }
   });
-  callback(null, data);
 };
+// result is gonna look like this ----> [{ id: '00001', text: '00001' }, { id: '00002', text: '00002' }];
+
 
 exports.readOne = (id, callback) => {
   var text = items[id];
